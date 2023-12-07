@@ -1,0 +1,4 @@
+deeplake[gcp]
+google-cloud-aiplatform
+streamlit
+sentence_transformers
