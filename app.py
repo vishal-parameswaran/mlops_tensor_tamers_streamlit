@@ -65,6 +65,7 @@ def predict_custom_trained_model_sample(
 
 def make_prompt(question,choice):
     if choice == 'Zero Shot':
+        context = None
         prompt = f"""<s>[INST]You are a helpful, respectful and honest hospital assistant. Please answer the question based on the context provided. If a context is not provided, then please answer to the best of your knowledge. If you don't know the answer to a question, please don't share false information. Let's think step by step.
 
 ### Question:
@@ -72,8 +73,9 @@ def make_prompt(question,choice):
 
 ### Answer:
 """
-        return prompt,None
+        return prompt,context
     elif choice == 'Few Shot':
+        context = None
         examples = [
             {"question": "How can you be smart with antibiotics?", "answer": "Only use antibiotics when prescribed by a certified healthcare provider."},
             {"question": "How should you lift objects to prevent back pain?", "answer": "Use your legs to lift, not your back. Keep the object close to your body."}
@@ -87,8 +89,9 @@ def make_prompt(question,choice):
 
 ### Answer:
 """
-        return prompt,None
+        return prompt,context
     elif choice == 'Chain of Thought':
+        context = None
         prompt = f"""<s>[INST]You are a helpful, respectful and honest hospital assistant. Please answer the question based on the context provided. If a context is not provided, then please answer to the best of your knowledge. If you don't know the answer to a question, please don't share false information. Let's think step by step.
 
 ### Question:
@@ -96,7 +99,7 @@ def make_prompt(question,choice):
 
 ### Answer:
 """
-        return prompt,None
+        return prompt,context
     elif choice == 'RAG':
         vcs = connect_to_deeplake()
         retrieved_documents = vcs.search(embedding_data=question, embedding_function=embedding_function,k=2)
@@ -122,22 +125,24 @@ selection = st.selectbox('Select a Prompt Engineering Approach', ['Zero Shot', '
 prompt = st.text_area('Enter a prompt', height=100)
 
 if st.button('Generate'):
-    prompt = make_prompt(prompt, selection)
-    instance =  {
-        "prompt": prompt,
-        "n": 1,
-        "temperature":0.1,
-        "top_k":10,
-        "max_tokens": 1024,
-    }
-    outputs,sources = predict_custom_trained_model_sample(
-        project="cloud-lab-0437",
-        endpoint_id="842747075387981824",
-        location="us-central1",
-        instances=instance
-        )
-    
-    st.write(outputs)
-    if st.button("Show Sources"):
-        st.write(sources)
+    with st.spinner('Generating...'):
+        prompt,sources= make_prompt(prompt, selection)
+        instance =  {
+            "prompt": prompt,
+            "n": 1,
+            "temperature":0.1,
+            "top_k":10,
+            "max_tokens": 1024,
+        }
+        outputs = predict_custom_trained_model_sample(
+            project="cloud-lab-0437",
+            endpoint_id="842747075387981824",
+            location="us-central1",
+            instances=instance
+            )
+        st.header('Answer')
+        st.write(outputs)
+        if sources:
+            st.header('Sources')
+            st.write(sources)
     
