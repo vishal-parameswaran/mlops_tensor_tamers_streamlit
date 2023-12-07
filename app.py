@@ -72,7 +72,7 @@ def make_prompt(question,choice):
 
 ### Answer:
 """
-        return prompt
+        return prompt,None
     elif choice == 'Few Shot':
         examples = [
             {"question": "How can you be smart with antibiotics?", "answer": "Only use antibiotics when prescribed by a certified healthcare provider."},
@@ -87,7 +87,7 @@ def make_prompt(question,choice):
 
 ### Answer:
 """
-        return prompt
+        return prompt,None
     elif choice == 'Chain of Thought':
         prompt = f"""<s>[INST]You are a helpful, respectful and honest hospital assistant. Please answer the question based on the context provided. If a context is not provided, then please answer to the best of your knowledge. If you don't know the answer to a question, please don't share false information. Let's think step by step.
 
@@ -96,7 +96,7 @@ def make_prompt(question,choice):
 
 ### Answer:
 """
-        return prompt
+        return prompt,None
     elif choice == 'RAG':
         vcs = connect_to_deeplake()
         retrieved_documents = vcs.search(embedding_data=question, embedding_function=embedding_function,k=2)
@@ -113,7 +113,7 @@ def make_prompt(question,choice):
 
 ### Answer:
 """
-        return prompt
+        return prompt,retrieved_documents
 
 st.title('TENSOR TAMERS Base Model')
 
@@ -130,10 +130,14 @@ if st.button('Generate'):
         "top_k":10,
         "max_tokens": 1024,
     }
-    outputs = predict_custom_trained_model_sample(
+    outputs,sources = predict_custom_trained_model_sample(
         project="cloud-lab-0437",
         endpoint_id="842747075387981824",
         location="us-central1",
         instances=instance
         )
+    
     st.write(outputs)
+    if st.button("Show Sources"):
+        st.write(sources)
+    
