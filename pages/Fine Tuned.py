@@ -7,7 +7,20 @@ from google.cloud import aiplatform
 from google.protobuf import json_format
 from google.protobuf.struct_pb2 import Value
 import os
+from deeplake import VectorStore
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('multi-qa-MiniLM-L6-cos-v1')
 
+
+@st.cache_resource
+def connect_to_deeplake():
+    vector_store = VectorStore(
+    path = 'hub://vishalparameswaran/mlops_tensor_tamers', token=st.secrets.DEEPLAKE.token,verbose=False,overwrite=False,read_only=True,
+    )
+    return vector_store
+
+def embedding_function(texts):
+   return model.encode(texts)
 
 def predict_custom_trained_model_sample(
     project: str,
@@ -50,7 +63,7 @@ def predict_custom_trained_model_sample(
     return predicted
 
 
-def make_prompt(question,choice,context=None):
+def make_prompt(question,choice):
     if choice == 'Zero Shot':
         prompt = f"""<s>[INST]You are a helpful, respectful and honest hospital assistant. Please answer the question based on the context provided. If a context is not provided, then please answer to the best of your knowledge. If you don't know the answer to a question, please don't share false information. Let's think step by step.
 
@@ -85,10 +98,15 @@ def make_prompt(question,choice,context=None):
 """
         return prompt
     elif choice == 'RAG':
+        vcs = connect_to_deeplake()
+        retrieved_documents = vcs.search(embedding_data=question, embedding_function=embedding_function,k=2)
+        new_context = ''
+        for i in range(len(retrieved_documents['text'])):
+            new_context = new_context + f'Source {i}:' + '\n' + retrieved_documents['text'][i] + '\n'
         prompt = f"""<s>[INST]You are a helpful, respectful and honest hospital assistant. Please answer the question based on the context provided. If a context is not provided, then please answer to the best of your knowledge. If you don't know the answer to a question, please don't share false information. Answer based on the contecxt provided. If you don't know the answer, please respond that you don't know.
 
 ### Context:
-{context}
+{new_context}
 
 ### Question:
 {question}
@@ -110,7 +128,7 @@ if st.button('Generate'):
         "n": 1,
         "temperature":0.1,
         "top_k":10,
-        "max_tokens": 128,
+        "max_tokens": 1024,
     }
     outputs = predict_custom_trained_model_sample(
         project="cloud-lab-0437",
