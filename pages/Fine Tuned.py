@@ -60,6 +60,9 @@ def predict_custom_trained_model_sample(
     for prediction in predictions:
         x = prediction.split('Output:')
         outputs.append(x[1])
+    string = '\n'.join(outputs)
+    string.replace(instance['prompt'],'')
+    string.replace('[/INST]','')
     return '\n'.join(outputs)
 
 
