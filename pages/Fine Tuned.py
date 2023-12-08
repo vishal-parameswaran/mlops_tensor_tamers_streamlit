@@ -133,7 +133,7 @@ if st.button('Generate'):
             "n": 1,
             "temperature":0.1,
             "top_k":10,
-            "max_tokens": 1024,
+            "max_tokens": 512,
         }
         outputs = predict_custom_trained_model_sample(
             project="cloud-lab-0437",
