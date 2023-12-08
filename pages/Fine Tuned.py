@@ -63,7 +63,7 @@ def predict_custom_trained_model_sample(
     string = '\n'.join(outputs)
     string.replace(instance['prompt'],'')
     string.replace('[/INST]','')
-    return '\n'.join(outputs)
+    return string
 
 
 def make_prompt(question,choice):
@@ -119,7 +119,7 @@ def make_prompt(question,choice):
 """
         return prompt,retrieved_documents
 
-st.title('TENSOR TAMERS Base Model')
+st.title('TENSOR TAMERS Fine Tuned Model')
 
 selection = st.selectbox('Select a Prompt Engineering Approach', ['Zero Shot', 'Few Shot', 'Chain of Thought', 'RAG'])
 
