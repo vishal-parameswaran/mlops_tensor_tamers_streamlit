@@ -56,11 +56,11 @@ def predict_custom_trained_model_sample(
     # print(" deployed_model_id:", response.deployed_model_id)
     # The predictions are a google.protobuf.Value representation of the model's predictions.
     predictions = response.predictions
+    outputs = []
     for prediction in predictions:
         x = prediction.split('Output:')
-        output = x[1]
-        predicted = output.split('[/INST]')[0]
-    return predicted
+        outputs.append(x[1])
+    return '\n'.join(outputs)
 
 
 def make_prompt(question,choice):
