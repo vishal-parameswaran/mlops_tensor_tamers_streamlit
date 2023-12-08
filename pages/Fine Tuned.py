@@ -106,7 +106,7 @@ def make_prompt(question,choice):
         new_context = ''
         for i in range(len(retrieved_documents['text'])):
             new_context = new_context + f'Source {i}:' + '\n' + retrieved_documents['text'][i] + '\n'
-        prompt = f"""<s>[INST]You are a helpful, respectful and honest hospital assistant. Please answer the question based on the context provided. If a context is not provided, then please answer to the best of your knowledge. If you don't know the answer to a question, please don't share false information. Answer based on the contecxt provided. If you don't know the answer, please respond that you don't know.
+        prompt = f"""<s>[INST]You are a helpful, respectful and honest hospital assistant. Please answer the question based on the context provided.
 ### Question:
 {question}
 
